@@ -8,6 +8,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { PenBox } from "lucide-react";
+import UserMenu from "../user/UserMenu";
 
 const Header = () => {
   return (
@@ -15,7 +16,7 @@ const Header = () => {
       <nav className="py-6 px-4 flex justify-between items-center">
         <Link to={"/"}>
           <img
-            src="https://krishnabucket021.s3.ap-southeast-2.amazonaws.com/zcrum/logo2.png"
+            src="https://krishnabucket021.s3.ap-southeast-2.amazonaws.com/zcrum/logo.png"
             loading="lazy"
             className="h-10 w-auto object-contain"
           ></img>
@@ -33,7 +34,7 @@ const Header = () => {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <UserButton />
+            <UserMenu />
           </SignedIn>
         </div>
       </nav>
