@@ -19,6 +19,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get("/", (req, res) => res.send("Test api for zcrum"));
+app.get("/test", (req, res) => res.send("Test gashgda api for zcrum"));
+
 
 app.use("/api/v1", require("./routes"));
 app.listen(port, () => {

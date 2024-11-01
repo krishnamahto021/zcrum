@@ -7,14 +7,13 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
-    name: {
+    firstName: {
       type: String,
       trim: true,
-      default: "vtu user",
     },
-    username: {
+    lastName: {
       type: String,
-      unique: true,
+      trim: true,
     },
     email: {
       type: String,

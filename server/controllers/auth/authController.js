@@ -2,7 +2,7 @@ const { Webhook } = require("svix");
 const User = require("../../models/userSchema");
 const { sendResponse } = require("../../utils/sendResponse");
 
-const createUser = async (req, res) => {
+const userHookToLinkWithClerk = async (req, res) => {
   // Get the headers
   const svix_id = req.headers["svix-id"];
   const svix_timestamp = req.headers["svix-timestamp"];
@@ -37,7 +37,15 @@ const createUser = async (req, res) => {
   }
 
   const { type } = evt;
-  const { id, email_addresses, username, first_name, last_name } = evt.data;
+
+  const {
+    id,
+    email_addresses,
+    first_name,
+    last_name,
+    image_url,
+    phone_numbers,
+  } = evt.data;
 
   try {
     // Handle different webhook events
@@ -46,9 +54,11 @@ const createUser = async (req, res) => {
         const newUser = await User.create({
           clerkId: id,
           email: email_addresses[0]?.email_address,
-          username: username || "",
           firstName: first_name || "",
           lastName: last_name || "",
+          isVerified: true,
+          profileImage: image_url,
+          phone: phone_numbers[0],
         });
         return sendResponse(res, 200, true, "User created successfully", {
           user: newUser,
@@ -60,7 +70,6 @@ const createUser = async (req, res) => {
           { clerkId: id },
           {
             email: email_addresses[0]?.email_address,
-            username: username || "",
             firstName: first_name || "",
             lastName: last_name || "",
           },
@@ -100,4 +109,4 @@ const createUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser };
+module.exports = { userHookToLinkWithClerk };

@@ -1,6 +1,8 @@
 const express = require("express");
-const { createUser } = require("../../controllers/auth/authController");
+const {
+  userHookToLinkWithClerk,
+} = require("../../controllers/auth/authController");
 const router = express.Router();
 
-router.post("/sign-up", createUser);
+router.post("/sign-up", userHookToLinkWithClerk);
 module.exports = router;
