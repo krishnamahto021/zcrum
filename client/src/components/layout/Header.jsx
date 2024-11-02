@@ -22,7 +22,7 @@ const Header = () => {
           ></img>
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/project/create">
+          <Link to="/user/project/create">
             <Button variant="destructive" className="flex items-center gap-3">
               <PenBox size={16} />
               <span className="hidden md:inline">Create Project</span>

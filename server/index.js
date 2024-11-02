@@ -4,6 +4,7 @@ const app = express();
 const connectDB = require("./config/db");
 const port = process.env.PORT || 8080;
 const cors = require("cors");
+const { clerkMiddleware } = require("@clerk/express");
 const { sendResponse } = require("./utils/sendResponse");
 connectDB();
 app.use(express.json());
@@ -18,7 +19,7 @@ const corsOptions = {
   exposedHeaders: ["Content-Disposition", "Content-Type"],
 };
 app.use(cors(corsOptions));
-
+app.use(clerkMiddleware());
 app.get("/", (req, res) => res.send("Test api for zcrum"));
 app.get("/unauthorized", (req, res) =>
   sendResponse(res, 400, false, "You are not authorized")

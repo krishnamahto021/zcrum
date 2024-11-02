@@ -21,6 +21,7 @@ export const useConfig = () => {
       try {
         const jwtToken = await getToken();
         // console.log(jwtToken);
+        console.log(jwtToken);
 
         setConfig({
           headers: {

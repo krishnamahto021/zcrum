@@ -43,7 +43,8 @@ const handleOrganizationWebhook = async (req, res) => {
   } = evt.data;
 
   try {
-    const createdBy = await User.find({ clerkId: created_by });
+    const createdBy = await User.findOne({ clerkId: created_by });
+
 
     let responseMessage;
     let organization;
@@ -138,6 +139,5 @@ const sendSingleOrganizationDetails = async (req, res) => {
 };
 
 // todo : webhook to handle the members
-
 
 module.exports = { handleOrganizationWebhook, sendSingleOrganizationDetails };

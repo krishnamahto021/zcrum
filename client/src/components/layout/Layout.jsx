@@ -6,7 +6,7 @@ const Layout = ({ children }) => {
   return (
     <div className="dotted-background">
       <Header />
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen p-7">{children}</main>
       <Footer />
     </div>
   );

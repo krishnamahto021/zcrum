@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import UserProfilePage from "./pages/user/userProfile";
 import OnBoarding from "./pages/user/OnBoarding";
 import OrganizationPage from "./pages/user/OrganizationPage";
+import Project from "./pages/user/Project";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -26,6 +27,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <OrganizationPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/project/create",
+    element: (
+      <ProtectedRoute>
+        <Project />
       </ProtectedRoute>
     ),
   },
