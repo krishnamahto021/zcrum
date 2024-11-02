@@ -1,23 +1,39 @@
 import Layout from "@/components/layout/Layout";
+import Loader from "@/components/Loader";
 import OrgSwitcher from "@/components/user/OrgSwitcher";
+import { useConfig } from "@/lib/utils";
+import {
+  getOrganization,
+  organizationSelector,
+} from "@/redux/reducers/organizationReducer";
 import { useAuth } from "@clerk/clerk-react";
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useParams } from "react-router-dom";
 
 const OrganizationPage = () => {
   const { userId } = useAuth();
+  const { organizationSlug } = useParams();
+  const { singleOrganization, fetchingOrganizationLoading } =
+    useSelector(organizationSelector);
+
   if (!userId) {
     return <Navigate to={"/sign-in"}></Navigate>;
   }
-  const organization = {
-    name: "vtu",
-  };
+  const dispatch = useDispatch();
+  const { configWithJWT } = useConfig();
+  useEffect(() => {
+    if (configWithJWT.headers.Authorization && organizationSlug) {
+      dispatch(getOrganization({ organizationSlug, configWithJWT }));
+    }
+  }, [organizationSlug, configWithJWT]);
   return (
     <Layout>
+      {fetchingOrganizationLoading && <Loader />}
       <div className="container mx-auto px-4">
         <div className="mb-4 flex flex-col sm:flex-row justify-between items-start">
           <h1 className="text-5xl font-bold gradient-title pb-2">
-            {organization.name}&rsquo;s Projects
+            {singleOrganization?.name}&rsquo;s Projects
           </h1>
 
           <OrgSwitcher />

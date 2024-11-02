@@ -9,7 +9,7 @@ const { requireAuth } = require("@clerk/express");
 router.post("/webhook", handleOrganizationWebhook);
 router.get(
   "/:slug",
-  requireAuth({ signInUrl: "/test" }),
+  requireAuth({ signInUrl: "/unauthorized" }),
   sendSingleOrganizationDetails
 );
 

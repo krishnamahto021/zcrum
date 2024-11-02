@@ -34,6 +34,9 @@ const organizationSchema = mongoose.Schema(
       },
     ],
     projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
+    imageUrl: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

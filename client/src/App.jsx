@@ -5,6 +5,8 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { shadesOfPurple } from "@clerk/themes";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 // Import your publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -34,8 +36,10 @@ const App = () => {
       }}
     >
       <ThemeProvider defaultTheme="dark" storageKey="zcrum-ui-theme">
-        <RouterProvider router={router} />
-        <Toaster richColors />
+        <Provider store={store}>
+          <RouterProvider router={router} />
+          <Toaster richColors />
+        </Provider>
       </ThemeProvider>
     </ClerkProvider>
   );

@@ -32,48 +32,80 @@ const handleOrganizationWebhook = async (req, res) => {
   }
 
   const { type } = evt;
-  const { id, name, slug, members = [], metadata, created_by } = evt.data;
+  const {
+    id,
+    name,
+    slug,
+    members = [],
+    metadata,
+    created_by,
+    image_url,
+  } = evt.data;
 
   try {
-    // Gather Clerk IDs, including created_by and any members if present
-    const clerkIds = new Set([created_by, ...members.map((m) => m.user_id)]);
+    const createdBy = await User.find({ clerkId: created_by });
 
-    // Batch query all required users in one go
-    const users = await User.find({
-      clerkUserId: { $in: Array.from(clerkIds) },
-    });
-    console.log(users);
+    let responseMessage;
+    let organization;
 
-    const userMap = users.reduce((acc, user) => {
-      acc[user.clerkUserId] = user._id;
-      return acc;
-    }, {});
-    console.log(userMap, created_by);
+    switch (type) {
+      case "organization.created":
+        organization = await Organization.create({
+          clerkOrganizationId: id,
+          name,
+          createdBy: createdBy._id,
+          slug,
+          members,
+          metadata,
+          imageUrl: image_url,
+        });
+        responseMessage = "Organization created successfully";
+        break;
 
-    if (!userMap[created_by]) {
-      return sendResponse(res, 404, false, "Creator user not found");
+      case "organization.updated":
+        organization = await Organization.findOneAndUpdate(
+          { clerkOrganizationId: id },
+          {
+            name,
+            slug,
+            members,
+            metadata,
+            imageUrl: image_url,
+          },
+          { new: true }
+        );
+        if (!organization) {
+          return sendResponse(
+            res,
+            404,
+            false,
+            "Organization not found for update"
+          );
+        }
+        responseMessage = "Organization updated successfully";
+        break;
+
+      case "organization.deleted":
+        organization = await Organization.findOneAndDelete({
+          clerkOrganizationId: id,
+        });
+        if (!organization) {
+          return sendResponse(
+            res,
+            404,
+            false,
+            "Organization not found for deletion"
+          );
+        }
+        responseMessage = "Organization deleted successfully";
+        break;
+
+      default:
+        return sendResponse(res, 400, false, "Unhandled event type");
     }
 
-    // Map member Clerk IDs to MongoDB ObjectIds, handling absence of members
-    const memberData = members.length
-      ? members.map((member) => ({
-          userId: userMap[member.user_id] || null, // Set to null if not found
-          role: member.role,
-          joinedAt: member.joined_at,
-        }))
-      : []; // Set to empty array if no members are provided
-
-    // Create organization
-    const newOrganization = await Organization.create({
-      clerkOrganizationId: id,
-      name,
-      createdBy: userMap[created_by],
-      slug,
-      members: memberData,
-      metadata,
-    });
-    return sendResponse(res, 200, true, "Organization created successfully", {
-      organization: newOrganization,
+    return sendResponse(res, 200, true, responseMessage, {
+      organization,
     });
   } catch (error) {
     console.error("Error processing webhook:", error);
@@ -104,5 +136,8 @@ const sendSingleOrganizationDetails = async (req, res) => {
     return sendResponse(res, 500, false, "Internal server error");
   }
 };
+
+// todo : webhook to handle the members
+
 
 module.exports = { handleOrganizationWebhook, sendSingleOrganizationDetails };
