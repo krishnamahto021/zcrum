@@ -7,6 +7,7 @@ import UserProfilePage from "./pages/user/userProfile";
 import OnBoarding from "./pages/user/OnBoarding";
 import OrganizationPage from "./pages/user/OrganizationPage";
 import Project from "./pages/user/Project";
+import SingleProjectPage from "./pages/user/SingleProjectPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
@@ -35,6 +36,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Project />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/organization/project/:projectId",
+    element: (
+      <ProtectedRoute>
+        <SingleProjectPage />
       </ProtectedRoute>
     ),
   },

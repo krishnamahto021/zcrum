@@ -8,11 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useDispatch } from "react-redux";
-import { createProject } from "@/redux/reducers/project/projectReducer";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createProject,
+  getProjects,
+  projectSelector,
+} from "@/redux/reducers/project/projectReducer";
 import { projectSchema } from "@/lib/formSchema/projectSchema";
 import { useConfig } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { organizationSelector } from "@/redux/reducers/organization/organizationReducer";
 
 const Project = () => {
   const { isLoaded: isOrgLoaded, membership } = useOrganization();
@@ -20,6 +25,8 @@ const Project = () => {
   const { isLoaded: isUserLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
   const { configWithJWT } = useConfig();
+  const { projects } = useSelector(projectSelector);
+  const { singleOrganization } = useSelector(organizationSelector);
   const navigate = useNavigate();
   const {
     register,
@@ -32,13 +39,17 @@ const Project = () => {
     if (isOrgLoaded && isUserLoaded && membership) {
       setIsAdmin(membership.role === "org:admin");
     }
-  }, [isOrgLoaded, isUserLoaded, membership]);
+    if (configWithJWT.headers.Authorization) {
+      dispatch(getProjects);
+    }
+  }, [isOrgLoaded, isUserLoaded, membership, configWithJWT]);
 
   const onSubmit = async (data) => {
     if (!isAdmin) {
       toast.warning("Only organization admins can create projects");
       return;
     }
+    console.log(projects);
 
     const result = await dispatch(
       createProject({ projectData: data, configWithJWT })
@@ -47,6 +58,9 @@ const Project = () => {
     // Check if the project was created successfully
     if (result.meta.requestStatus === "fulfilled") {
       reset(); // Clear the form fields
+      navigate(
+        `/organization/project/${projects[singleOrganization._id][0]._id}`
+      );
     }
   };
 

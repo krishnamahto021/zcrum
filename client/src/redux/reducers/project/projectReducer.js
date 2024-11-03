@@ -117,11 +117,14 @@ const projectSlice = createSlice({
     builder
       // Create Project
       .addCase(createProject.fulfilled, (state, action) => {
-        const { organizationId, project } = action.payload;
+        const { project } = action.payload;
+
+        const organizationId = project.organizationId;
+        console.log(organizationId);
         if (!state.projects[organizationId]) {
           state.projects[organizationId] = [];
         }
-        state.projects[organizationId].push(project);
+        state.projects[organizationId].unshift(project);
       })
       // Get Projects
       .addCase(getProjects.pending, (state) => {
