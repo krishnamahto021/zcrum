@@ -1,14 +1,19 @@
 const Organization = require("../../models/organizationSchema");
 const Project = require("../../models/projectSchema");
-const User = require("../../models/userSchema");
+const { getAuth } = require("@clerk/express");
 const { sendResponse } = require("../../utils/sendResponse");
 // CREATE a new project
 const createProject = async (req, res) => {
   try {
-    const { name, key, description, organizationId, sprints, issues } =
-      req.body;
-    const organization = await Organization.findById(organizationId);
+    const { orgId } = getAuth(req);
+    const { name, key, description, sprints, issues } = req.body;
 
+    if (!orgId) {
+      return sendResponse(res, 400, false, "Please select the organization ");
+    }
+    const organization = await Organization.findOne({
+      clerkOrganizationId: orgId,
+    });
     if (!organization) {
       return sendResponse(res, 404, false, "Organization not found");
     }
@@ -25,7 +30,7 @@ const createProject = async (req, res) => {
       name,
       key,
       description,
-      organizationId,
+      organizationId: organization._id,
       sprints,
       issues,
     });
@@ -40,8 +45,23 @@ const createProject = async (req, res) => {
 // READ all projects for the given organinzation
 const getProjects = async (req, res) => {
   try {
-    const { organizationId } = req.params;
-    const projects = await Project.find({ organizationId });
+    const { orgId } = getAuth(req);
+    if (!orgId) {
+      return sendResponse(
+        res,
+        404,
+        false,
+        "Select the orgainzation to get the projects"
+      );
+    }
+    const organization = await Organization.findOne({
+      clerkOrganizationId: orgId,
+    });
+    if (!organization) {
+      return sendResponse(res, 404, false, "Organization not found");
+    }
+
+    const projects = await Project.find({ organizationId: organization._id });
     sendResponse(res, 200, true, "Projects retrieved successfully", {
       projects,
     });

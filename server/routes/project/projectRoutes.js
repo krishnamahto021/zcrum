@@ -9,7 +9,7 @@ const {
 const router = express.Router();
 
 router.post("/create", createProject);
-router.get("/:organizationId", getProjects);
+router.get("/", getProjects);
 router.get("/get/:projectId", getProjectById);
 router.put("/:projectId", updateProject);
 router.delete("/:projectId", deleteProject);

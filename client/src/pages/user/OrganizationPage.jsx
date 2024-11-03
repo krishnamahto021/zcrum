@@ -5,7 +5,7 @@ import { useConfig } from "@/lib/utils";
 import {
   getOrganization,
   organizationSelector,
-} from "@/redux/reducers/organizationReducer";
+} from "@/redux/reducers/organization/organizationReducer";
 import { useAuth } from "@clerk/clerk-react";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

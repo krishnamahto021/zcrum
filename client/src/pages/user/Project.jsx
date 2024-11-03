@@ -9,18 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
+import { createProject } from "@/redux/reducers/project/projectReducer";
+import { projectSchema } from "@/lib/formSchema/projectSchema";
+import { useConfig } from "@/lib/utils";
 
 const Project = () => {
   const { isLoaded: isOrgLoaded, membership } = useOrganization();
   const dispatch = useDispatch();
   const { isLoaded: isUserLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { configWithJWT } = useConfig();
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isLoading },
-  } = useForm({ resolver: zodResolver });
-  console.log(membership);
+  } = useForm({ resolver: zodResolver(projectSchema) });
 
   useEffect(() => {
     if (isOrgLoaded && isUserLoaded && membership) {
@@ -34,7 +38,14 @@ const Project = () => {
       return;
     }
 
-    // createProjectFn(data);
+    const result = await dispatch(
+      createProject({ projectData: data, configWithJWT })
+    );
+
+    // Check if the project was created successfully
+    if (result.meta.requestStatus === "fulfilled") {
+      reset(); // Clear the form fields
+    }
   };
 
   if (!isAdmin) {
@@ -49,6 +60,7 @@ const Project = () => {
       </Layout>
     );
   }
+
   return (
     <Layout>
       <div className="container mx-auto py-10">
@@ -99,11 +111,10 @@ const Project = () => {
             type="submit"
             size="lg"
             disabled={isLoading}
-            className="bg-blue-500 text-white"
+            className="w-fit block m-auto"
           >
             {isLoading ? "Creating..." : "Create Project"}
           </Button>
-          {/* {error && <p className="text-red-500 mt-2">{error.message}</p>} */}
         </form>
       </div>
     </Layout>
