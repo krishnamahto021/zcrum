@@ -5,6 +5,7 @@ import { backendApi } from "@/lib/utils";
 const initialState = {
   projects: {},
   fetchingProjectsLoading: false,
+  deletingProjectLoading: false,
   singleProject: {},
 };
 
@@ -42,9 +43,8 @@ export const getProjects = createAsyncThunk(
         `/organization/project`,
         configWithJWT
       );
-
       if (data.success) {
-        return { organizationId, projects: data.projects };
+        return { projects: data.projects };
       } else {
         return thunkAPI.rejectWithValue(data.message);
       }
@@ -87,7 +87,7 @@ export const updateProject = createAsyncThunk(
 
 export const deleteProject = createAsyncThunk(
   "organization/projects/delete",
-  async ({ configWithJWT, organizationId, projectId }, thunkAPI) => {
+  async ({ configWithJWT, organizationId, projectId, index }, thunkAPI) => {
     try {
       const { data } = await backendApi.delete(
         `/organization/project/${projectId}`,
@@ -96,7 +96,7 @@ export const deleteProject = createAsyncThunk(
 
       if (data.success) {
         toast.success("Project deleted successfully");
-        return { organizationId, projectId };
+        return { organizationId, index };
       } else {
         return thunkAPI.rejectWithValue(data.message);
       }
@@ -108,3 +108,64 @@ export const deleteProject = createAsyncThunk(
     }
   }
 );
+
+const projectSlice = createSlice({
+  name: "project",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      // Create Project
+      .addCase(createProject.fulfilled, (state, action) => {
+        const { organizationId, project } = action.payload;
+        if (!state.projects[organizationId]) {
+          state.projects[organizationId] = [];
+        }
+        state.projects[organizationId].push(project);
+      })
+      // Get Projects
+      .addCase(getProjects.pending, (state) => {
+        state.fetchingProjectsLoading = true;
+      })
+      .addCase(getProjects.fulfilled, (state, action) => {
+        const { projects } = action.payload;
+        projects.forEach((project) => {
+          const orgId = project.organizationId;
+          if (!state.projects[orgId]) {
+            state.projects[orgId] = [];
+          }
+          state.projects[orgId] = projects;
+        });
+        state.fetchingProjectsLoading = false;
+      })
+      .addCase(getProjects.rejected, (state) => {
+        state.fetchingProjectsLoading = false;
+      })
+      // Update Project
+      .addCase(updateProject.fulfilled, (state, action) => {
+        const { organizationId, project } = action.payload;
+        const orgProjects = state.projects[organizationId] || [];
+        const index = orgProjects.findIndex((p) => p.id === project.id);
+        if (index !== -1) {
+          orgProjects[index] = project;
+        }
+      })
+      // Delete Project
+      .addCase(deleteProject.pending, (state) => {
+        state.deletingProjectLoading = true;
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
+        const { organizationId, index } = action.payload;
+        if (state.projects[organizationId]) {
+          state.projects[organizationId].splice(index, 1);
+        }
+        state.deletingProjectLoading = false;
+      })
+      .addCase(deleteProject.rejected, (state) => {
+        state.deletingProjectLoading = false;
+      });
+  },
+});
+
+export const projectReducer = projectSlice.reducer;
+export const projectSelector = (state) => state.projectReducer;

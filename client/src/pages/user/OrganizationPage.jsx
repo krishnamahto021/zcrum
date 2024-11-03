@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import Loader from "@/components/Loader";
+import ProjectList from "@/components/projects/ProjectList";
 import OrgSwitcher from "@/components/user/OrgSwitcher";
 import { useConfig } from "@/lib/utils";
 import {
@@ -39,7 +40,7 @@ const OrganizationPage = () => {
           <OrgSwitcher />
         </div>
         <div className="mb-4">
-          {/* <ProjectList orgId={organization.id} /> */}
+          <ProjectList />
         </div>
         <div className="mt-8">{/* <UserIssues userId={userId} /> */}</div>
       </div>

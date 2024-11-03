@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { createProject } from "@/redux/reducers/project/projectReducer";
 import { projectSchema } from "@/lib/formSchema/projectSchema";
 import { useConfig } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const Project = () => {
   const { isLoaded: isOrgLoaded, membership } = useOrganization();
@@ -19,6 +20,7 @@ const Project = () => {
   const { isLoaded: isUserLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState(false);
   const { configWithJWT } = useConfig();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
