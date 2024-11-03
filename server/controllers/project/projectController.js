@@ -2,6 +2,7 @@ const Organization = require("../../models/organizationSchema");
 const Project = require("../../models/projectSchema");
 const { getAuth } = require("@clerk/express");
 const { sendResponse } = require("../../utils/sendResponse");
+const Sprint = require("../../models/sprintSchema");
 // CREATE a new project
 const createProject = async (req, res) => {
   try {
@@ -28,7 +29,7 @@ const createProject = async (req, res) => {
     }
     const project = await Project.create({
       name,
-      key,
+      key: key.toUpperCase(),
       description,
       organizationId: organization._id,
       sprints,
@@ -125,6 +126,10 @@ const deleteProject = async (req, res) => {
     if (project.organizationId.createdBy.toString() !== req.user.toString()) {
       return sendResponse(res, 404, false, "You are not authorized to delete");
     }
+    // remove all the sprints for the fiven project id
+    await Sprint.deleteMany({ projectId: req.params.projectId });
+
+    // TODO : remove all the issues 
     await project.deleteOne();
     sendResponse(res, 200, true, "Project deleted successfully");
   } catch (error) {

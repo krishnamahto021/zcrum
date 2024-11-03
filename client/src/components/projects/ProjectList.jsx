@@ -49,7 +49,7 @@ const ProjectList = () => {
       ...prev,
       [projectId]: !prev[projectId],
     }));
-    setTempProjectData(project); // store project data in temp state for editing
+    setTempProjectData(project);
   };
 
   const handleChange = (e) => {

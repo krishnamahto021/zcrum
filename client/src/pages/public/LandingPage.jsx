@@ -98,7 +98,7 @@ const LandingPage = () => {
             Get Started <ChevronRight size={18} className="ml-1" />
           </Button>
         </Link>
-        <Link href="#features">
+        <Link to="#features">
           <Button size="lg" variant="outline">
             Learn More
           </Button>
