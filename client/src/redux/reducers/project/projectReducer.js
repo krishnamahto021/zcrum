@@ -28,8 +28,6 @@ export const createProject = createAsyncThunk(
       const errMessage =
         error.response?.data?.message || "Failed to create project";
       toast.error(errMessage);
-      console.log(error);
-
       return thunkAPI.rejectWithValue(errMessage);
     }
   }
@@ -109,6 +107,28 @@ export const deleteProject = createAsyncThunk(
   }
 );
 
+export const getProjectById = createAsyncThunk(
+  "organization/projects/byId",
+  async ({ configWithJWT, projectId }, thunkAPI) => {
+    try {
+      const { data } = await backendApi.get(
+        `/organization/project/get/${projectId}`,
+        configWithJWT
+      );
+      if (data.success) {
+        return data.project;
+      } else {
+        return thunkAPI.rejectWithValue(data.message);
+      }
+    } catch (error) {
+      const errMessage =
+        error.response?.data?.message || "Failed to fetch project";
+      toast.error(errMessage);
+      return thunkAPI.rejectWithValue(errMessage);
+    }
+  }
+);
+
 const projectSlice = createSlice({
   name: "project",
   initialState,
@@ -120,7 +140,6 @@ const projectSlice = createSlice({
         const { project } = action.payload;
 
         const organizationId = project.organizationId;
-        console.log(organizationId);
         if (!state.projects[organizationId]) {
           state.projects[organizationId] = [];
         }
@@ -166,6 +185,18 @@ const projectSlice = createSlice({
       })
       .addCase(deleteProject.rejected, (state) => {
         state.deletingProjectLoading = false;
+      })
+
+      // fetching single project
+      .addCase(getProjectById.pending, (state) => {
+        state.fetchingProjectsLoading = true;
+      })
+      .addCase(getProjectById.fulfilled, (state, action) => {
+        state.singleProject = action.payload;
+        state.fetchingProjectsLoading = false;
+      })
+      .addCase(getProjectById.rejected, (state) => {
+        state.fetchingProjectsLoading = false;
       });
   },
 });

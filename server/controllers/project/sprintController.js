@@ -5,8 +5,8 @@ const { sendResponse } = require("../../utils/sendResponse");
 // Create a new Sprint
 module.exports.createSprint = async (req, res) => {
   try {
-    const { startDate, endDate, status, projectId } = req.body;
-
+    const { dateRange, status, projectId } = req.body;
+    const { from: startDate, to: endDate } = dateRange;
     if (!startDate || !endDate || !projectId) {
       return sendResponse(
         res,
@@ -53,8 +53,9 @@ module.exports.createSprint = async (req, res) => {
 module.exports.getSprint = async (req, res) => {
   try {
     const { sprintId } = req.params;
-    const sprint = await Sprint.findById(sprintId).populate("projectId");
-    //   .populate("issues");
+    const sprint = await Sprint.findById(sprintId)
+      .populate("projectId")
+      .populate("issues");
 
     if (!sprint) {
       return sendResponse(res, 404, false, "Sprint not found.");
@@ -90,8 +91,9 @@ module.exports.updateSprint = async (req, res) => {
     const sprint = await Sprint.findByIdAndUpdate(sprintId, req.body, {
       new: true,
       runValidators: true,
-    }).populate("projectId");
-    //   .populate("issues");
+    })
+      .populate("projectId")
+      .populate("issues");
 
     await sprint.save();
     sendResponse(res, 200, true, "Sprint updated successfully", { sprint });
@@ -137,8 +139,9 @@ module.exports.getAllSprintsForProject = async (req, res) => {
     if (!projectId) {
       return sendResponse(res, 404, false, "Project not found.");
     }
-    const sprint = await Sprint.find({ projectId }).populate("projectId");
-    //   .populate("issues");
+    const sprint = await Sprint.find({ projectId })
+      .populate("projectId")
+      .populate("issues");
 
     if (!sprint) {
       return sendResponse(res, 404, false, "Sprint not found.");
