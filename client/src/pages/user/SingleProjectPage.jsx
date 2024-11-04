@@ -21,6 +21,7 @@ import { CalendarIcon } from "lucide-react";
 import "react-day-picker/dist/style.css";
 import Layout from "@/components/layout/Layout";
 import Loader from "@/components/Loader";
+import { createSprint } from "@/redux/reducers/project/sprintReducer";
 
 const SingleProjectPage = () => {
   const { projectId } = useParams();
@@ -68,7 +69,8 @@ const SingleProjectPage = () => {
   }, [singleProject, setValue]);
 
   const onSubmit = async (data) => {
-   dispatch()
+    const dataToBeSent = { ...data, projectId };
+    dispatch(createSprint({ sprintData: dataToBeSent, configWithJWT }));
     setShowForm(false);
   };
 
@@ -173,6 +175,10 @@ const SingleProjectPage = () => {
             </form>
           </CardContent>
         </Card>
+      )}
+
+      {singleProject && singleProject.sprints?.length > 0 && (
+        <p>{singleProject.sprints[0].name}</p>
       )}
     </Layout>
   );

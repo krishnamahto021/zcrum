@@ -62,7 +62,9 @@ const getProjects = async (req, res) => {
       return sendResponse(res, 404, false, "Organization not found");
     }
 
-    const projects = await Project.find({ organizationId: organization._id });
+    const projects = await Project.find({
+      organizationId: organization._id,
+    }).populate("sprints");
     sendResponse(res, 200, true, "Projects retrieved successfully", {
       projects,
     });
@@ -76,7 +78,9 @@ const getProjects = async (req, res) => {
 // READ a single project by ID
 const getProjectById = async (req, res) => {
   try {
-    const project = await Project.findById(req.params.projectId);
+    const project = await Project.findById(req.params.projectId).populate(
+      "sprints"
+    );
     if (!project) return sendResponse(res, 404, false, "Project not found");
     sendResponse(res, 200, true, "Project retrieved successfully", { project });
   } catch (error) {
@@ -129,7 +133,7 @@ const deleteProject = async (req, res) => {
     // remove all the sprints for the fiven project id
     await Sprint.deleteMany({ projectId: req.params.projectId });
 
-    // TODO : remove all the issues 
+    // TODO : remove all the issues
     await project.deleteOne();
     sendResponse(res, 200, true, "Project deleted successfully");
   } catch (error) {
