@@ -17,7 +17,7 @@ const sprintSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
+      enum: ["PLANNED", "ACTIVE", "COMPLETED"],
       default: "PLANNED",
     },
     projectId: {
@@ -25,12 +25,12 @@ const sprintSchema = new mongoose.Schema(
       ref: "Project",
       required: true,
     },
-    issues: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Issue",
-      },
-    ],
+    // issues: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Issue",
+    //   },
+    // ],
   },
   {
     timestamps: true,

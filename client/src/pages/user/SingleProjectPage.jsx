@@ -21,7 +21,12 @@ import { CalendarIcon } from "lucide-react";
 import "react-day-picker/dist/style.css";
 import Layout from "@/components/layout/Layout";
 import Loader from "@/components/Loader";
-import { createSprint } from "@/redux/reducers/project/sprintReducer";
+import {
+  createSprint,
+  getSprints,
+} from "@/redux/reducers/project/sprintReducer";
+import SprintBoard from "@/components/projects/SprintBoard";
+import SprintManager from "@/components/projects/SprintManager";
 
 const SingleProjectPage = () => {
   const { projectId } = useParams();
@@ -40,6 +45,9 @@ const SingleProjectPage = () => {
   useEffect(() => {
     if (configWithJWT.headers.Authorization) {
       dispatch(getProjectById({ configWithJWT, projectId }));
+      if (singleProject) {
+        dispatch(getSprints({ configWithJWT, projectId }));
+      }
     }
   }, [configWithJWT]);
 
@@ -178,7 +186,7 @@ const SingleProjectPage = () => {
       )}
 
       {singleProject && singleProject.sprints?.length > 0 && (
-        <p>{singleProject.sprints[0].name}</p>
+        <SprintManager projectId={projectId} />
       )}
     </Layout>
   );
