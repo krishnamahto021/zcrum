@@ -8,7 +8,7 @@ const {
 const router = express.Router();
 
 router.post("/create", createIssue);
-router.get("/", getIssues);
+router.get("/sprint/:sprintId", getIssues);
 router.get("/:id", getIssueById);
 router.delete("/:id", deleteIssue);
 

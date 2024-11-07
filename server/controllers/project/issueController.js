@@ -15,7 +15,7 @@ module.exports.createIssue = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!title  || !priority || !projectId) {
+    if (!title || !priority || !projectId) {
       return sendResponse(res, 400, false, "Missing required fields");
     }
 
@@ -44,15 +44,13 @@ module.exports.createIssue = async (req, res) => {
 
 // Get All Issues for a Project or Sprint
 exports.getIssues = async (req, res) => {
-  const { projectId, sprintId } = req.query;
+  const { sprintId } = req.params;
 
   try {
-    const query = { projectId };
-    if (sprintId) query.sprintId = sprintId;
+    const issues = await Issue.find({ sprintId }).populate(
+      "assigneeId reporterId projectId sprintId"
+    );
 
-    const issues = await Issue.find(query)
-      .sort({ status: 1})
-      .populate("assigneeId reporterId projectId sprintId");
     return sendResponse(res, 200, true, "Issues fetched successfully", {
       issues,
     });

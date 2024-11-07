@@ -36,12 +36,14 @@ export const createIssue = createAsyncThunk(
 // Get Issues
 export const getIssues = createAsyncThunk(
   "organization/issues/get",
-  async ({ configWithJWT }, thunkAPI) => {
+  async ({ configWithJWT, sprintId }, thunkAPI) => {
     try {
       const { data } = await backendApi.get(
-        `/organization/issue`,
+        `/organization/project/issue/sprint/${sprintId}`,
         configWithJWT
       );
+      console.log(data,sprintId);
+
       if (data.success) {
         return { issues: data.issues };
       } else {
@@ -176,4 +178,4 @@ const issueSlice = createSlice({
 });
 
 export const issueReducer = issueSlice.reducer;
-export const issueSelector = (state) => state.issue;
+export const issueSelector = (state) => state.issueReducer;
