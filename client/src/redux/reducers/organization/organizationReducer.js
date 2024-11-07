@@ -15,7 +15,6 @@ export const getOrganization = createAsyncThunk(
         `/user/organization/${organizationSlug}`,
         configWithJWT
       );
-
       if (data.success) {
         return data.organization;
       } else {

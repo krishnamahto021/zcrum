@@ -6,14 +6,13 @@ const issueSchema = new mongoose.Schema(
     description: { type: String },
     status: {
       type: String,
-      enum: ["OPEN", "IN_PROGRESS", "DONE"],
-      default: "OPEN",
+      enum: ["TODO", "IN_PROGRESS", "IN_REVIEW","DONE"],
+      default: "TODO",
       required: true,
     },
-    order: { type: Number, required: true },
     priority: {
       type: String,
-      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"], // Adjust based on your priorities
+      enum: ["LOW", "MEDIUM", "HIGH", "URGENT"], 
       required: true,
     },
     assigneeId: {

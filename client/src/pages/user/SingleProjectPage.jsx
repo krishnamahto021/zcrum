@@ -28,12 +28,14 @@ import {
 import SprintBoard from "@/components/projects/SprintBoard";
 import SprintManager from "@/components/projects/SprintManager";
 
+
 const SingleProjectPage = () => {
   const { projectId } = useParams();
   const { configWithJWT } = useConfig();
   const dispatch = useDispatch();
   const [showForm, setShowForm] = useState(false);
   const today = startOfToday();
+
   const [dateRange, setDateRange] = useState({
     from: today,
     to: addDays(today, 14),
@@ -81,7 +83,6 @@ const SingleProjectPage = () => {
     dispatch(createSprint({ sprintData: dataToBeSent, configWithJWT }));
     setShowForm(false);
   };
-
   return (
     <Layout>
       {fetchingProjectsLoading && <Loader />}
@@ -187,6 +188,10 @@ const SingleProjectPage = () => {
 
       {singleProject && singleProject.sprints?.length > 0 && (
         <SprintManager projectId={projectId} />
+      )}
+
+      {singleProject && singleProject.sprints?.length > 0 && (
+        <SprintBoard projectId={projectId} />
       )}
     </Layout>
   );

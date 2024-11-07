@@ -76,6 +76,21 @@ module.exports.updateSprint = async (req, res) => {
     if (!sprint) {
       return sendResponse(res, 404, false, "Sprint not found");
     }
+    const now = new Date();
+    const startDate = new Date(sprint.startDate);
+    const endDate = new Date(sprint.endDate);
+    if (status === "ACTIVE" && (now < startDate || now > endDate)) {
+      return sendResponse(
+        res,
+        400,
+        false,
+        "Cannot start sprint outside of its date range"
+      );
+    }
+
+    if (status === "COMPLETED" && sprint.status !== "ACTIVE") {
+      return sendResponse(res, 400, false, "Can only complete active sprint");
+    }
     sprint.status = status;
     await sprint.save();
     sendResponse(res, 200, true, "Sprint updated successfully", { sprint });

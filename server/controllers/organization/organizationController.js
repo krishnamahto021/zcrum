@@ -32,73 +32,135 @@ const handleOrganizationWebhook = async (req, res) => {
   }
 
   const { type } = evt;
-  const {
-    id,
-    name,
-    slug,
-    members = [],
-    metadata,
-    created_by,
-    image_url,
-  } = evt.data;
 
   try {
-    const createdBy = await User.findOne({ clerkId: created_by });
-
-
     let responseMessage;
     let organization;
 
     switch (type) {
       case "organization.created":
+        const { id, name, slug, created_by, image_url } = evt.data;
+        const createdBy = await User.findOne({ clerkId: created_by });
+
+        if (!createdBy) {
+          return sendResponse(res, 404, false, "Creator user not found");
+        }
+
         organization = await Organization.create({
           clerkOrganizationId: id,
           name,
-          createdBy: createdBy._id,
           slug,
-          members,
-          metadata,
           imageUrl: image_url,
+          createdBy: createdBy._id,
+          members: [
+            {
+              userId: createdBy._id,
+              role: "admin",
+              joinedAt: new Date(),
+            },
+          ],
         });
+
+        // Populate the created organization
+        organization = await organization.populate([
+          {
+            path: "members.userId",
+            select: "firstName lastName email profileImage clerkId",
+          },
+          {
+            path: "createdBy",
+            select: "firstName lastName email profileImage",
+          },
+        ]);
+
         responseMessage = "Organization created successfully";
         break;
 
-      case "organization.updated":
-        organization = await Organization.findOneAndUpdate(
-          { clerkOrganizationId: id },
-          {
-            name,
-            slug,
-            members,
-            metadata,
-            imageUrl: image_url,
-          },
-          { new: true }
-        );
-        if (!organization) {
-          return sendResponse(
-            res,
-            404,
-            false,
-            "Organization not found for update"
-          );
+      case "organizationMembership.created":
+        const memberClerkId = evt.data.public_user_data.user_id;
+        const organizationId = evt.data.organization.id;
+        const role = evt.data.role === "org:admin" ? "admin" : "member";
+
+        const memberUser = await User.findOne({ clerkId: memberClerkId });
+        if (!memberUser) {
+          return sendResponse(res, 404, false, "Member user not found");
         }
-        responseMessage = "Organization updated successfully";
+
+        organization = await Organization.findOne({
+          clerkOrganizationId: organizationId,
+        });
+
+        if (!organization) {
+          return sendResponse(res, 404, false, "Organization not found");
+        }
+
+        // Check if user is already a member
+        const existingMember = organization.members.find(
+          (member) => member.userId.toString() === memberUser._id.toString()
+        );
+
+        if (!existingMember) {
+          organization.members.push({
+            userId: memberUser._id,
+            role,
+            joinedAt: new Date(),
+          });
+          await organization.save();
+
+          // Populate the updated organization
+          organization = await organization.populate([
+            {
+              path: "members.userId",
+              select: "firstName lastName email profileImage clerkId",
+            },
+            {
+              path: "createdBy",
+              select: "firstName lastName email profileImage",
+            },
+          ]);
+        }
+
+        responseMessage = "Member added successfully";
         break;
 
-      case "organization.deleted":
-        organization = await Organization.findOneAndDelete({
-          clerkOrganizationId: id,
+      case "organizationMembership.deleted":
+        const removedMemberClerkId = evt.data.public_user_data.user_id;
+        const orgIdForRemoval = evt.data.organization.id;
+
+        const removedUser = await User.findOne({
+          clerkId: removedMemberClerkId,
         });
-        if (!organization) {
-          return sendResponse(
-            res,
-            404,
-            false,
-            "Organization not found for deletion"
-          );
+        if (!removedUser) {
+          return sendResponse(res, 404, false, "Member user not found");
         }
-        responseMessage = "Organization deleted successfully";
+
+        organization = await Organization.findOne({
+          clerkOrganizationId: orgIdForRemoval,
+        });
+
+        if (!organization) {
+          return sendResponse(res, 404, false, "Organization not found");
+        }
+
+        // Remove member
+        organization.members = organization.members.filter(
+          (member) => member.userId.toString() !== removedUser._id.toString()
+        );
+        await organization.save();
+
+        // Populate after removing member
+        organization = await organization.populate([
+          {
+            path: "members.userId",
+            select: "firstName lastName email profileImage clerkId",
+          },
+          {
+            path: "createdBy",
+            select: "firstName lastName email profileImage",
+          },
+        ]);
+
+        responseMessage = "Member removed successfully";
         break;
 
       default:
@@ -126,10 +188,20 @@ const sendSingleOrganizationDetails = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    const organization = await Organization.findOne({ slug });
+    const organization = await Organization.findOne({ slug })
+      .populate({
+        path: "members.userId",
+        select: "firstName lastName email profileImage clerkId",
+      })
+      .populate({
+        path: "createdBy",
+        select: "firstName lastName email profileImage",
+      });
+
     if (!organization) {
       return sendResponse(res, 404, false, "Organization not found");
     }
+
     return sendResponse(res, 200, true, "Fetched organization", {
       organization,
     });
@@ -138,6 +210,7 @@ const sendSingleOrganizationDetails = async (req, res) => {
   }
 };
 
-// todo : webhook to handle the members
-
-module.exports = { handleOrganizationWebhook, sendSingleOrganizationDetails };
+module.exports = {
+  handleOrganizationWebhook,
+  sendSingleOrganizationDetails,
+};

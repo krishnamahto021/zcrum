@@ -25,12 +25,12 @@ const sprintSchema = new mongoose.Schema(
       ref: "Project",
       required: true,
     },
-    // issues: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Issue",
-    //   },
-    // ],
+    issues: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Issue",
+      },
+    ],
   },
   {
     timestamps: true,
