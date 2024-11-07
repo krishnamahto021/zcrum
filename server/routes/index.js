@@ -14,4 +14,9 @@ router.use(
   authorizeUser,
   require("../routes/project/sprintRoutes")
 );
+router.use(
+  "/organization/project/issue",
+  authorizeUser,
+  require("../routes/project/issueRoutes")
+);
 module.exports = router;

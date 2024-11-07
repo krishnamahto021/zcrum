@@ -15,7 +15,7 @@ module.exports.createIssue = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!title || !order || !priority || !reporterId || !projectId) {
+    if (!title  || !priority || !projectId) {
       return sendResponse(res, 400, false, "Missing required fields");
     }
 
@@ -34,6 +34,8 @@ module.exports.createIssue = async (req, res) => {
       issue: newIssue,
     });
   } catch (error) {
+    console.error(`Error in creating issue ${error}`);
+
     return sendResponse(res, 500, false, "Failed to create issue", {
       error: error.message,
     });
@@ -49,7 +51,7 @@ exports.getIssues = async (req, res) => {
     if (sprintId) query.sprintId = sprintId;
 
     const issues = await Issue.find(query)
-      .sort({ status: 1, order: 1 })
+      .sort({ status: 1})
       .populate("assigneeId reporterId projectId sprintId");
     return sendResponse(res, 200, true, "Issues fetched successfully", {
       issues,

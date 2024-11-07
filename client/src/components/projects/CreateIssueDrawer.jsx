@@ -22,6 +22,7 @@ import {
 import { useConfig } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { sprintSelector } from "@/redux/reducers/project/sprintReducer";
+import { createIssue } from "@/redux/reducers/project/issueReducer";
 
 const CreateIssueDrawer = ({ isOpen, onClose, projectId }) => {
   const { orgSlug } = useAuth();
@@ -69,12 +70,8 @@ const CreateIssueDrawer = ({ isOpen, onClose, projectId }) => {
       assigneeId: data.assigneeId,
       projectId: projectId,
       sprintId: currentSprint._id,
-      // reporterId will be added by the backend using req.user
     };
-
-    console.log("Issue Data to be submitted:", issueData);
-    // Here you would typically dispatch an action to create the issue
-    // dispatch(createIssue({ configWithJWT, issueData }));
+    dispatch(createIssue({ configWithJWT, issueData }));
 
     // Reset form and close drawer
     reset();
