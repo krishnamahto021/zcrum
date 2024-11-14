@@ -14,6 +14,7 @@ const corsOptions = {
   origin: [
     "http://localhost:5173",
     // deployed url later
+    "https://zcrum-backend-api.vercel.app",
   ],
   optionsSuccessStatus: 200,
   exposedHeaders: ["Content-Disposition", "Content-Type"],

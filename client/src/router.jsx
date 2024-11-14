@@ -3,7 +3,7 @@ import LandingPage from "./pages/public/LandingPage";
 import SignInPage from "./pages/auth/SignIn";
 import SignUpPage from "./pages/auth/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
-import UserProfilePage from "./pages/user/userProfile";
+import UserProfilePage from "./pages/user/UserProfile";
 import OnBoarding from "./pages/user/OnBoarding";
 import OrganizationPage from "./pages/user/OrganizationPage";
 import Project from "./pages/user/Project";
