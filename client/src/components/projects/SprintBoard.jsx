@@ -12,6 +12,7 @@ import {
 import { sprintSelector } from "@/redux/reducers/project/sprintReducer";
 import { useConfig } from "@/lib/utils";
 import IssueCard from "./IssueCard";
+import { toast } from "sonner";
 
 const SprintBoard = ({ projectId }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -38,6 +39,16 @@ const SprintBoard = ({ projectId }) => {
   const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
+    if (currentSprint.status === "PLANNED") {
+      toast.warning("Start the sprint to update board");
+      return;
+    }
+
+    if (currentSprint.status === "COMPLETED") {
+      toast.warning("Cannot update board after sprint end");
+      return;
+    }
+
     // If dropped outside a droppable area
     if (!destination) return;
 
@@ -56,39 +67,45 @@ const SprintBoard = ({ projectId }) => {
 
     if (!issue) return;
 
-    // Calculate new order
-    let newOrder;
-    if (destination.index === 0) {
-      // If dropped at the start
-      const firstIssue = issuesByStatus[destinationStatus][0];
-      newOrder = firstIssue ? firstIssue.order / 2 : 1;
-    } else if (destination.index >= issuesByStatus[destinationStatus].length) {
-      // If dropped at the end
-      const lastIssue =
-        issuesByStatus[destinationStatus][
-          issuesByStatus[destinationStatus].length - 1
-        ];
-      newOrder = lastIssue ? lastIssue.order + 1 : 1;
+
+    // Get all issues in the destination status
+    let updatedIssues = [...issuesByStatus[destinationStatus]];
+    // If moving within the same status
+    if (sourceStatus === destinationStatus) {
+      // Remove the issue from its current position
+      updatedIssues = updatedIssues.filter((i) => i._id !== draggableId);
+      // Insert it at the new position
+      updatedIssues.splice(destination.index, 0, issue);
     } else {
-      // If dropped between two issues
-      const beforeIssue =
-        issuesByStatus[destinationStatus][destination.index - 1];
-      const afterIssue = issuesByStatus[destinationStatus][destination.index];
-      newOrder = (beforeIssue.order + afterIssue.order) / 2;
+      // If moving to a different status, just insert at the new position
+      updatedIssues.splice(destination.index, 0, {
+        ...issue,
+        status: destinationStatus,
+      });
     }
 
-    // Dispatch update
-    dispatch(
-      updateIssue({
-        configWithJWT,
-        issueId: draggableId,
-        issueData: {
-          status: destinationStatus,
-          order: newOrder,
-          previousStatus: sourceStatus,
-        },
-      })
-    );
+    // Update orders for all affected issues
+    const batchUpdates = updatedIssues.map((issue, index) => {
+      return dispatch(
+        updateIssue({
+          configWithJWT,
+          issueId: issue._id,
+          issueData: {
+            status: destinationStatus,
+            order: index + 1,
+            previousStatus:
+              issue.status !== destinationStatus ? issue.status : undefined,
+          },
+        })
+      );
+    });
+
+    // Wait for all updates to complete
+    try {
+      await Promise.all(batchUpdates);
+    } catch (error) {
+      toast.error("Failed to update issue order");
+    }
   };
 
   if (loading) {

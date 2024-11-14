@@ -65,6 +65,7 @@ const IssueDetailsDialog = ({ isOpen, onClose, issue, borderCol }) => {
   };
   const handleDelete = async () => {
     dispatch(deleteIssue({ configWithJWT, issueId: issue._id }));
+    onClose();
   };
 
   return (
