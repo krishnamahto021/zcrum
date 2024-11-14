@@ -18,7 +18,8 @@ const App = () => {
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
       signInUrl="http://localhost:5173/sign-in"
-      afterSignOutUrl="/sign-in"
+      afterSignOutUrl="/"
+      signUpUrl="http://localhost:5173/sign-up"
       appearance={{
         baseTheme: shadesOfPurple,
         variables: {
