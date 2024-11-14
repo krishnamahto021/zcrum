@@ -2,10 +2,40 @@ import { backendApi } from "@/lib/utils";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "sonner";
 const initialState = {
-  issues: [],
+  issuesByStatus: {
+    TODO: [],
+    IN_PROGRESS: [],
+    IN_REVIEW: [],
+    DONE: [],
+  },
   singleIssue: {},
   loading: false,
 };
+
+// helper function to organize issue
+
+const organizeIssuesByStatus = (issues) => {
+  const organized = {
+    TODO: [],
+    IN_PROGRESS: [],
+    IN_REVIEW: [],
+    DONE: [],
+  };
+
+  issues.forEach((issue) => {
+    if (organized[issue.status]) {
+      organized[issue.status].push(issue);
+    }
+  });
+
+  // Sort each status array by order
+  Object.keys(organized).forEach((status) => {
+    organized[status].sort((a, b) => a.order - b.order);
+  });
+
+  return organized;
+};
+
 // Create Issue
 export const createIssue = createAsyncThunk(
   "organization/issues/create",
@@ -16,8 +46,6 @@ export const createIssue = createAsyncThunk(
         issueData,
         configWithJWT
       );
-      console.log(data);
-
       if (data.success) {
         toast.success(data.message);
         return { issue: data.issue };
@@ -42,7 +70,6 @@ export const getIssues = createAsyncThunk(
         `/organization/project/issue/sprint/${sprintId}`,
         configWithJWT
       );
-      console.log(data,sprintId);
 
       if (data.success) {
         return { issues: data.issues };
@@ -64,10 +91,12 @@ export const updateIssue = createAsyncThunk(
   async ({ configWithJWT, issueId, issueData }, thunkAPI) => {
     try {
       const { data } = await backendApi.put(
-        `/organization/issue/${issueId}`,
+        `/organization/project/issue/${issueId}`,
         issueData,
         configWithJWT
       );
+      console.log(data);
+
       if (data.success) {
         toast.success(data.message);
         return { issue: data.issue };
@@ -89,12 +118,14 @@ export const deleteIssue = createAsyncThunk(
   async ({ configWithJWT, issueId }, thunkAPI) => {
     try {
       const { data } = await backendApi.delete(
-        `/organization/issue/${issueId}`,
+        `/organization/project/issue/${issueId}`,
         configWithJWT
       );
+      console.log(data);
+
       if (data.success) {
         toast.success("Issue deleted successfully");
-        return { issueId };
+        return { issue: data.issue };
       } else {
         return thunkAPI.rejectWithValue(data.message);
       }
@@ -138,7 +169,8 @@ const issueSlice = createSlice({
     builder
       // Create Issue
       .addCase(createIssue.fulfilled, (state, action) => {
-        state.issues.unshift(action.payload.issue);
+        const newIssue = action.payload.issue;
+        state.issuesByStatus[newIssue.status].unshift(newIssue);
       })
 
       // Get Issues
@@ -146,7 +178,7 @@ const issueSlice = createSlice({
         state.loading = true;
       })
       .addCase(getIssues.fulfilled, (state, action) => {
-        state.issues = action.payload.issues;
+        state.issuesByStatus = organizeIssuesByStatus(action.payload.issues);
         state.loading = false;
       })
       .addCase(getIssues.rejected, (state) => {
@@ -156,18 +188,29 @@ const issueSlice = createSlice({
       // Update Issue
       .addCase(updateIssue.fulfilled, (state, action) => {
         const updatedIssue = action.payload.issue;
-        const index = state.issues.findIndex(
-          (issue) => issue.id === updatedIssue.id
+
+        // First, find and remove the issue from its current status array
+        Object.keys(state.issuesByStatus).forEach((status) => {
+          state.issuesByStatus[status] = state.issuesByStatus[status].filter(
+            (issue) => issue._id !== updatedIssue._id
+          );
+        });
+
+        // Then add the updated issue to its new status array
+        state.issuesByStatus[updatedIssue.status].push(updatedIssue);
+
+        // Sort the array by order if needed
+        state.issuesByStatus[updatedIssue.status].sort(
+          (a, b) => a.order - b.order
         );
-        if (index !== -1) {
-          state.issues[index] = updatedIssue;
-        }
       })
 
       // Delete Issue
       .addCase(deleteIssue.fulfilled, (state, action) => {
-        const { issueId } = action.payload;
-        state.issues = state.issues.filter((issue) => issue.id !== issueId);
+        const { issue } = action.payload;
+        state.issuesByStatus[issue.status] = state.issuesByStatus[
+          issue.status
+        ].filter((i) => i._id !== issue._id);
       })
 
       // Get Issue by ID
@@ -179,3 +222,4 @@ const issueSlice = createSlice({
 
 export const issueReducer = issueSlice.reducer;
 export const issueSelector = (state) => state.issueReducer;
+0;

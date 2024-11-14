@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,6 +9,7 @@ import {
 import { Badge } from "../ui/badge";
 import UserAvatar from "../user/UserAvatar";
 import { formatDistanceToNow } from "date-fns";
+import IssueDetailsDialog from "./IssueDetailsDialog";
 const priorityColor = {
   LOW: "border-green-600",
   MEDIUM: "border-yellow-300",
@@ -19,11 +20,13 @@ const IssueCard = ({ issue, showStatus = false }) => {
   const created = formatDistanceToNow(new Date(issue.createdAt), {
     addSuffix: true,
   });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <>
       <Card
         className="cursor-pointer hover:shadow-md transition-shadow"
-        // onClick={() => setIsDialogOpen(true)}
+        onClick={() => setIsDialogOpen(true)}
       >
         <CardHeader
           className={`border-t-2 ${priorityColor[issue.priority]} rounded-lg`}
@@ -44,16 +47,14 @@ const IssueCard = ({ issue, showStatus = false }) => {
         </CardFooter>
       </Card>
 
-      {/* {isDialogOpen && (
+      {isDialogOpen && (
         <IssueDetailsDialog
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
           issue={issue}
-          onDelete={onDeleteHandler}
-          onUpdate={onUpdateHandler}
           borderCol={priorityColor[issue.priority]}
         />
-      )} */}
+      )}
     </>
   );
 };

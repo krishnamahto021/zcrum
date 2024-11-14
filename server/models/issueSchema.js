@@ -6,13 +6,13 @@ const issueSchema = new mongoose.Schema(
     description: { type: String },
     status: {
       type: String,
-      enum: ["TODO", "IN_PROGRESS", "IN_REVIEW","DONE"],
+      enum: ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"],
       default: "TODO",
       required: true,
     },
     priority: {
       type: String,
-      enum: ["LOW", "MEDIUM", "HIGH", "URGENT"], 
+      enum: ["LOW", "MEDIUM", "HIGH", "URGENT"],
       required: true,
     },
     assigneeId: {
@@ -33,6 +33,10 @@ const issueSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Sprint",
       default: null,
+    },
+    order: {
+      type: Number,
+      required: true,
     },
   },
   { timestamps: true }
