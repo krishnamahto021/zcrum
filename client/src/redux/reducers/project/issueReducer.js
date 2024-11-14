@@ -95,8 +95,6 @@ export const updateIssue = createAsyncThunk(
         issueData,
         configWithJWT
       );
-      console.log(data);
-
       if (data.success) {
         toast.success(data.message);
         return { issue: data.issue };

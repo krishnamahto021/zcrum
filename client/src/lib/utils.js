@@ -21,7 +21,6 @@ export const useConfig = () => {
       try {
         const jwtToken = await getToken();
         // console.log(jwtToken);
-        console.log(jwtToken);
 
         setConfig({
           headers: {
@@ -50,10 +49,3 @@ export const useConfig = () => {
 export const backendApi = axios.create({
   baseURL: "http://localhost:8000/api/v1",
 });
-
-export const reOrder = (list, statrtIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(statrtIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};

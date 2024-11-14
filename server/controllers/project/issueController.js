@@ -50,6 +50,11 @@ module.exports.createIssue = async (req, res) => {
     });
     project.issues.push(newIssue._id);
     await project.save();
+    await newIssue.populate([
+      { path: "assigneeId" }, // Adjust fields to select as needed
+      { path: "projectId" }, // Adjust fields to select as needed
+      { path: "sprintId" }, // Adjust fields to select as needed
+    ]);
     return sendResponse(res, 201, true, "Issue created successfully", {
       issue: newIssue,
     });
@@ -108,7 +113,6 @@ exports.getIssueById = async (req, res) => {
 exports.updateIssue = async (req, res) => {
   const { id } = req.params;
   const updateFields = req.body;
-
 
   try {
     // Validate if issue exists
