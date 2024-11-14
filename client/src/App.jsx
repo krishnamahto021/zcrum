@@ -17,9 +17,9 @@ const App = () => {
   return (
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
-      signInUrl="http://localhost:5173/sign-in"
+      signInUrl="https://zcrum-psi.vercel.app/sign-in"
       afterSignOutUrl="/"
-      signUpUrl="http://localhost:5173/sign-up"
+      signUpUrl="https://zcrum-psi.vercel.app/sign-up"
       appearance={{
         baseTheme: shadesOfPurple,
         variables: {
