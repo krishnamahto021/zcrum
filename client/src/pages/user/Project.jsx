@@ -49,18 +49,14 @@ const Project = () => {
       toast.warning("Only organization admins can create projects");
       return;
     }
-    console.log(projects);
 
     const result = await dispatch(
       createProject({ projectData: data, configWithJWT })
     );
-
     // Check if the project was created successfully
     if (result.meta.requestStatus === "fulfilled") {
       reset(); // Clear the form fields
-      navigate(
-        `/organization/project/${projects[singleOrganization._id][0]._id}`
-      );
+      navigate(`/organization/project/${result.payload.project._id}`);
     }
   };
 

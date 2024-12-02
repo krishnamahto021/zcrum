@@ -187,7 +187,6 @@ const handleOrganizationWebhook = async (req, res) => {
 const sendSingleOrganizationDetails = async (req, res) => {
   try {
     const { slug } = req.params;
-
     const organization = await Organization.findOne({ slug })
       .populate({
         path: "members.userId",
